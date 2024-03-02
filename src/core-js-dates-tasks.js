@@ -173,8 +173,18 @@ function formatDate(date) {
  * 12, 2023 => 10
  * 1, 2024 => 8
  */
-function getCountWeekendsInMonth(/* month, year */) {
-  throw new Error('Not implemented');
+function getCountWeekendsInMonth(month, year) {
+  const date = new Date(year, month - 1);
+  const dayEnd = new Date(year, month, 0);
+  let count = 0;
+  for (let day = 1; day <= dayEnd.getDate(); day += 1) {
+    date.setDate(day);
+    const d = date.getDay();
+    if (d === 6 || d === 0) {
+      count += 1;
+    }
+  }
+  return count;
 }
 
 /**
@@ -204,8 +214,15 @@ function getWeekNumberByDate(/* date */) {
  * Date(2024, 0, 13) => Date(2024, 8, 13)
  * Date(2023, 1, 1) => Date(2023, 9, 13)
  */
-function getNextFridayThe13th(/* date */) {
-  throw new Error('Not implemented');
+function getNextFridayThe13th(date) {
+  const tmpDate = new Date(date.toJSON());
+  let tmpMonth = tmpDate.getMonth() + (tmpDate.getDate() < 13 ? 0 : 1);
+  tmpDate.setMonth(tmpMonth, 13);
+  while (tmpDate.getDay() !== 5) {
+    tmpMonth += 1;
+    tmpDate.setMonth(tmpMonth);
+  }
+  return tmpDate;
 }
 
 /**
@@ -241,8 +258,25 @@ function getQuarter(date) {
  * { start: '01-01-2024', end: '15-01-2024' }, 1, 3 => ['01-01-2024', '05-01-2024', '09-01-2024', '13-01-2024']
  * { start: '01-01-2024', end: '10-01-2024' }, 1, 1 => ['01-01-2024', '03-01-2024', '05-01-2024', '07-01-2024', '09-01-2024']
  */
-function getWorkSchedule(/* period, countWorkDays, countOffDays */) {
-  throw new Error('Not implemented');
+function getWorkSchedule(period, countWorkDays, countOffDays) {
+  const schedule = [];
+  const padded = (num, repeat = 2) => String(num).padStart(repeat, '0');
+  const formatD = (d) =>
+    `${padded(d.getDate())}-${padded(d.getMonth() + 1)}-${d.getFullYear()}`;
+  const endDate = new Date(period.end.split('-').reverse().join('-'));
+  const date = new Date(period.start.split('-').reverse().join('-'));
+  let cnt = 1;
+  while (date <= endDate) {
+    if (cnt > countWorkDays) {
+      cnt = 1;
+      date.setDate(date.getDate() + countOffDays);
+    } else {
+      schedule.push(formatD(date));
+      date.setDate(date.getDate() + 1);
+      cnt += 1;
+    }
+  }
+  return schedule;
 }
 
 /**
